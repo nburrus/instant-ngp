@@ -728,7 +728,7 @@ void Testbed::imgui() {
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Debug visualization")) {
+		if (ImGui::TreeNodeEx("Debug visualization", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Checkbox("Visualize unit cube", &m_visualize_unit_cube);
 			if (m_testbed_mode == ETestbedMode::Nerf) {
 				ImGui::SameLine();
