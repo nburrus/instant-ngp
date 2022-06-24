@@ -86,6 +86,7 @@ struct NerfDataset {
 	float scale = 1.0f;
 	int aabb_scale = 1;
 	bool from_mitsuba = false;
+	bool from_opengl = false;
 	bool is_hdr = false;
 	bool wants_importance_sampling = true;
 	bool has_rays = false;
@@ -99,10 +100,12 @@ struct NerfDataset {
 
 	void set_training_image(int frame_idx, const Eigen::Vector2i& image_resolution, const void* pixels, const void* depth_pixels, float depth_scale, bool image_data_on_gpu, EImageDataType image_type, EDepthDataType depth_type, float sharpen_amount = 0.f, bool white_transparent = false, bool black_transparent = false, uint32_t mask_color = 0, const Ray *rays = nullptr);
 
-	Eigen::Vector3f nerf_direction_to_ngp(const Eigen::Vector3f& nerf_dir) {
+	Eigen::Vector3f nerf_direction_to_ngp(const Eigen::Vector3f& nerf_dir) {	
 		Eigen::Vector3f result = nerf_dir;
 		if (from_mitsuba) {
 			result *= -1;
+		} else if (from_opengl) {
+			// do nothing.
 		} else {
 			result=Eigen::Vector3f(result.y(), result.z(), result.x());
 		}
@@ -111,15 +114,18 @@ struct NerfDataset {
 
 	Eigen::Matrix<float, 3, 4> nerf_matrix_to_ngp(const Eigen::Matrix<float, 3, 4>& nerf_matrix) {
 		Eigen::Matrix<float, 3, 4> result = nerf_matrix;
-		result.col(1) *= -1;
-		result.col(2) *= -1;
+		// Apply the scale and offset to the translation.
 		result.col(3) = result.col(3) * scale + offset;
 
 		if (from_mitsuba) {
 			result.col(0) *= -1;
-			result.col(2) *= -1;
+			result.col(1) *= -1;
+		} else if (from_opengl) {
+			// do nothing.
 		} else {
 			// Cycle axes xyz<-yzx
+			result.col(1) *= -1;
+			result.col(2) *= -1;
 			Eigen::Vector4f tmp = result.row(0);
 			result.row(0) = (Eigen::Vector4f)result.row(1);
 			result.row(1) = (Eigen::Vector4f)result.row(2);
@@ -133,16 +139,18 @@ struct NerfDataset {
 		Eigen::Matrix<float, 3, 4> result = ngp_matrix;
 		if (from_mitsuba) {
 			result.col(0) *= -1;
-			result.col(2) *= -1;
+			result.col(1) *= -1;
+		} else if (from_opengl) {
+			// do nothing
 		} else {
 			// Cycle axes xyz->yzx
 			Eigen::Vector4f tmp = result.row(0);
 			result.row(0) = (Eigen::Vector4f)result.row(2);
 			result.row(2) = (Eigen::Vector4f)result.row(1);
 			result.row(1) = tmp;
+			result.col(1) *= -1;
+			result.col(2) *= -1;
 		}
-		result.col(1) *= -1;
-		result.col(2) *= -1;
 		result.col(3) = (result.col(3) - offset) / scale;
 		return result;
 	}
@@ -152,15 +160,18 @@ struct NerfDataset {
 		if (scale_direction)
 			ray.d *= scale;
 
-		float tmp = ray.o[0];
-		ray.o[0] = ray.o[1];
-		ray.o[1] = ray.o[2];
-		ray.o[2] = tmp;
+		if (!from_opengl)
+		{
+			float tmp = ray.o[0];
+			ray.o[0] = ray.o[1];
+			ray.o[1] = ray.o[2];
+			ray.o[2] = tmp;
 
-		tmp = ray.d[0];
-		ray.d[0] = ray.d[1];
-		ray.d[1] = ray.d[2];
-		ray.d[2] = tmp;
+			tmp = ray.d[0];
+			ray.d[0] = ray.d[1];
+			ray.d[1] = ray.d[2];
+			ray.d[2] = tmp;
+		}
 	}
 };
 

@@ -528,6 +528,7 @@ PYBIND11_MODULE(pyngp, m) {
 		.def_readonly("scale", &NerfDataset::scale)
 		.def_readonly("aabb_scale", &NerfDataset::aabb_scale)
 		.def_readonly("from_mitsuba", &NerfDataset::from_mitsuba)
+		.def_readonly("from_opengl", &NerfDataset::from_opengl)
 		.def_readonly("is_hdr", &NerfDataset::is_hdr)
 		;
 

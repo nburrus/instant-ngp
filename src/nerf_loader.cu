@@ -427,6 +427,10 @@ NerfDataset load_nerf(const std::vector<filesystem::path>& jsonpaths, float shar
 			result.from_mitsuba = true;
 		}
 
+		if (json.contains("from_opengl")) {
+			result.from_opengl = (bool)json["from_opengl"];
+		}
+
 		if (json.contains("fix_premult")) {
 			fix_premult = (bool)json["fix_premult"];
 		}
