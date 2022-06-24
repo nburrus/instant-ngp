@@ -2260,7 +2260,8 @@ void Testbed::render_nerf(CudaRenderBuffer& render_buffer, const Vector2i& max_r
 	if (m_render_mode == ERenderMode::Slice) {
 		n_hit = m_nerf.tracer.n_rays_initialized();
 	} else {
-		float depth_scale = 1.0f / m_nerf.training.dataset.scale;
+		// float depth_scale = 1.0f / m_nerf.training.dataset.scale;
+		float depth_scale = 0.1f;
 		n_hit = m_nerf.tracer.trace(
 			*m_nerf_network,
 			m_render_aabb,
