@@ -181,9 +181,12 @@ int main_func(const std::vector<std::string>& arguments) {
 	}
 
 	// Render/training loop
-	while (testbed.frame()) {
-		if (!gui) {
-			tlog::info() << "iteration=" << testbed.m_training_step << " loss=" << testbed.m_loss_scalar.val();
+	if (!gui) {
+		for (int i = 0; i < 20000 && testbed.frame(); ++i)
+		{
+			if (i % 10 == 0) {
+				tlog::info() << "iteration=" << testbed.m_training_step << " loss=" << testbed.m_loss_scalar.val() << " time(ms)=" << testbed.m_training_ms.ema_val();
+			}
 		}
 	}
 
